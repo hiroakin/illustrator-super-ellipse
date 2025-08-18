@@ -1,0 +1,39 @@
+{
+  "name": "illustrator-super-ellipse",
+  "version": "2.0.0",
+  "description": "Adobe Illustrator用の改良版スーパー楕円作成スクリプト",
+  "main": "supersquircles.jsx",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "adobe-illustrator",
+    "script",
+    "super-ellipse",
+    "squircle",
+    "design",
+    "graphics",
+    "extendscript"
+  ],
+  "author": "HIROAKI NAKANO",
+  "contributors": [
+    "AI Assistant"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/[your-username]/illustrator-super-ellipse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/[your-username]/illustrator-super-ellipse/issues"
+  },
+  "homepage": "https://github.com/[your-username]/illustrator-super-ellipse#readme",
+  "engines": {
+    "adobe-illustrator": ">=CS6"
+  },
+  "files": [
+    "supersquircles.jsx",
+    "README.md",
+    "LICENSE"
+  ]
+}
