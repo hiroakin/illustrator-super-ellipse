@@ -14,7 +14,7 @@ Adobe Illustrator上で美しいスーパー楕円（スーパースクワーク
 
 ### 1. スクリプトのダウンロード
 ```bash
-git clone https://github.com/[your-username]/illustrator-super-ellipse.git
+git clone https://github.com/hiroakin/illustrator-super-ellipse.git
 ```
 
 ### 2. スクリプトの配置
@@ -99,7 +99,7 @@ C:\Program Files\Adobe\Adobe Illustrator <バージョン>\Presets\ja_JP\スク�
 
 ## 🤝 貢献
 
-バグ報告や機能要望は[Issues](https://github.com/[your-username]/illustrator-super-ellipse/issues)までお気軽にお寄せください。
+バグ報告や機能要望は[Issues](https://github.com/hiroakin/illustrator-super-ellipse/issues)までお気軽にお寄せください。
 
 ## 📄 ライセンス
 

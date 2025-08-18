@@ -22,12 +22,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/[your-username]/illustrator-super-ellipse.git"
+    "url": "https://github.com/hiroakin/illustrator-super-ellipse.git"
   },
   "bugs": {
-    "url": "https://github.com/[your-username]/illustrator-super-ellipse/issues"
+    "url": "https://github.com/hiroakin/illustrator-super-ellipse/issues"
   },
-  "homepage": "https://github.com/[your-username]/illustrator-super-ellipse#readme",
+      "homepage": "https://github.com/hiroakin/illustrator-super-ellipse#readme",
   "engines": {
     "adobe-illustrator": ">=CS6"
   },
