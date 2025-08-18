@@ -1,6 +1,4 @@
-// スーパー楕円描画スクリプト（動作確認済み版）
-// 元のコードの動作部分を保持し、UIの改良のみを適用
-
+// スーパー楕円描画スクリプト（改良版）
 // エラーハンドリングとパラメータ検証
 function validateInput(value, min, max, defaultValue, name) {
     var num = parseFloat(value);
@@ -52,7 +50,7 @@ var pointRow = shapeGroup.add('group');
 pointRow.orientation = 'row';
 pointRow.alignChildren = ['left', 'center'];
 pointRow.add('statictext', undefined, 'ポイント数:');
-var pointInput = pointRow.add('edittext', undefined, '12');
+var pointInput = pointRow.add('edittext', undefined, '16');
 pointInput.characters = 8;
 pointRow.add('statictext', undefined, '（8-64推奨）');
 
@@ -108,7 +106,7 @@ if (dlg.show() != 1) {
 // パラメータ取得と検証
 var width = validateInput(widthInput.text, 1, 10000, 200, '横幅');
 var height = validateInput(heightInput.text, 1, 10000, 200, '縦幅');
-var pointCount = Math.round(validateInput(pointInput.text, 4, 100, 12, 'ポイント数'));
+var pointCount = Math.round(validateInput(pointInput.text, 4, 100, 16, 'ポイント数'));
 var n = validateInput(exponentInput.text, 0.1, 20, 2.5, '指数');
 var strokeWidth = validateInput(strokeInput.text, 0, 100, 1, '線幅');
 var isFilled = fillCheck.value;
@@ -122,7 +120,7 @@ if (!app.documents.length) {
 
 var docObj = app.activeDocument;
 
-// スーパー楕円の頂点計算（元のコードと同じ）
+// スーパー楕円の頂点計算
 var anchorpoint = [];
 for (var i = 0; i < pointCount; i++) {
     var t = (2 * Math.PI) * (i / pointCount);
@@ -148,30 +146,37 @@ pObj.stroked = true;
 pObj.strokeWidth = strokeWidth;
 pObj.closed = true;
 
-// 曲線用ハンドルを接線方向で設定（元のコードと同じ）
+// 曲線用ハンドルを接線方向で設定（改良版）
 for (var i = 0; i < pointCount; i++) {
     var t = (2 * Math.PI) * (i / pointCount);
 
-    // 接線ベクトル（tで微分した方向）
-    var dx = -Math.sin(t);
-    var dy = Math.cos(t);
-
-    // ハンドル長の計算（円の理論値を近似利用）
+    // スーパー楕円の接線ベクトル（より正確な計算）
+    var cosT = Math.cos(t);
+    var sinT = Math.sin(t);
+    var absCosT = Math.abs(cosT);
+    var absSinT = Math.abs(sinT);
+    
+    // スーパー楕円の微分
+    var dx = -Math.sin(t) * Math.pow(absCosT, 2/n - 1) * sign(cosT);
+    var dy = Math.cos(t) * Math.pow(absSinT, 2/n - 1) * sign(sinT);
+    
+    // ハンドル長の計算（曲率に基づく動的調整）
     var delta = (2 * Math.PI) / pointCount;
-    var handleLen = (4 / 3) * Math.tan(delta / 4);
+    var baseHandleLen = (4 / 3) * Math.tan(delta / 4);
+    
+    // 曲率に基づくハンドル長の調整
+    var curvature = Math.abs(Math.cos(t) * Math.sin(t));
+    var adjustedHandleLen = baseHandleLen * (1 + curvature * 0.5);
 
-    // ハンドルの長さをスーパー楕円の形状に合わせてスケーリング
-    var xScale = Math.pow(Math.abs(Math.cos(t)), 2 / n) * (width / 2);
-    var yScale = Math.pow(Math.abs(Math.sin(t)), 2 / n) * (height / 2);
-
-    // ハンドルの方向ベクトル（接線方向にhandleLen分だけ伸ばす）
+    // ハンドルの方向ベクトル
+    var handleLength = adjustedHandleLen * Math.min(width, height) / 2;
     var outHandle = [
-        anchorpoint[i][0] + dx * handleLen * (width / 2),
-        anchorpoint[i][1] + dy * handleLen * (height / 2)
+        anchorpoint[i][0] + dx * handleLength,
+        anchorpoint[i][1] + dy * handleLength
     ];
     var inHandle = [
-        anchorpoint[i][0] - dx * handleLen * (width / 2),
-        anchorpoint[i][1] - dy * handleLen * (height / 2)
+        anchorpoint[i][0] - dx * handleLength,
+        anchorpoint[i][1] - dy * handleLength
     ];
 
     var pt = pObj.pathPoints[i];
