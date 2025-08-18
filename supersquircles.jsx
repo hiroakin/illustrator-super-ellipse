@@ -120,12 +120,18 @@ if (!app.documents.length) {
 
 var docObj = app.activeDocument;
 
-// スーパー楕円の頂点計算
+// スーパー楕円の頂点計算（修正版）
 var anchorpoint = [];
 for (var i = 0; i < pointCount; i++) {
     var t = (2 * Math.PI) * (i / pointCount);
-    var x = Math.pow(Math.abs(Math.cos(t)), 2 / n) * (width / 2) * sign(Math.cos(t));
-    var y = Math.pow(Math.abs(Math.sin(t)), 2 / n) * (height / 2) * sign(Math.sin(t));
+    
+    // スーパー楕円の公式: |x/a|^n + |y/b|^n = 1
+    var cosT = Math.cos(t);
+    var sinT = Math.sin(t);
+    
+    // パラメータ形式での計算
+    var x = Math.pow(Math.abs(cosT), 2/n) * (width / 2) * sign(cosT);
+    var y = Math.pow(Math.abs(sinT), 2/n) * (height / 2) * sign(sinT);
     
     // 中心位置に配置する場合
     if (centerPosition) {
@@ -146,39 +152,54 @@ pObj.stroked = true;
 pObj.strokeWidth = strokeWidth;
 pObj.closed = true;
 
-// 曲線用ハンドルを接線方向で設定（改良版）
+// 曲線用ハンドルを設定（簡潔で確実な方法）
 for (var i = 0; i < pointCount; i++) {
     var t = (2 * Math.PI) * (i / pointCount);
-
-    // スーパー楕円の接線ベクトル（より正確な計算）
-    var cosT = Math.cos(t);
-    var sinT = Math.sin(t);
-    var absCosT = Math.abs(cosT);
-    var absSinT = Math.abs(sinT);
     
-    // スーパー楕円の微分
-    var dx = -Math.sin(t) * Math.pow(absCosT, 2/n - 1) * sign(cosT);
-    var dy = Math.cos(t) * Math.pow(absSinT, 2/n - 1) * sign(sinT);
+    // 次の点と前の点を計算
+    var nextT = (2 * Math.PI) * ((i + 1) % pointCount) / pointCount;
+    var prevT = (2 * Math.PI) * ((i - 1 + pointCount) % pointCount) / pointCount;
     
-    // ハンドル長の計算（曲率に基づく動的調整）
-    var delta = (2 * Math.PI) / pointCount;
-    var baseHandleLen = (4 / 3) * Math.tan(delta / 4);
+    // 接線方向を計算（前後の点の差分）
+    var nextX = Math.pow(Math.abs(Math.cos(nextT)), 2/n) * (width / 2) * sign(Math.cos(nextT));
+    var nextY = Math.pow(Math.abs(Math.sin(nextT)), 2/n) * (height / 2) * sign(Math.sin(nextT));
+    var prevX = Math.pow(Math.abs(Math.cos(prevT)), 2/n) * (width / 2) * sign(Math.cos(prevT));
+    var prevY = Math.pow(Math.abs(Math.sin(prevT)), 2/n) * (height / 2) * sign(Math.sin(prevT));
     
-    // 曲率に基づくハンドル長の調整
-    var curvature = Math.abs(Math.cos(t) * Math.sin(t));
-    var adjustedHandleLen = baseHandleLen * (1 + curvature * 0.5);
-
-    // ハンドルの方向ベクトル
-    var handleLength = adjustedHandleLen * Math.min(width, height) / 2;
-    var outHandle = [
-        anchorpoint[i][0] + dx * handleLength,
-        anchorpoint[i][1] + dy * handleLength
-    ];
-    var inHandle = [
-        anchorpoint[i][0] - dx * handleLength,
-        anchorpoint[i][1] - dy * handleLength
-    ];
-
+    // 中心位置の調整
+    if (centerPosition) {
+        var artboard = docObj.artboards[docObj.artboards.getActiveArtboardIndex()];
+        var centerX = artboard.artboardRect[0] + (artboard.artboardRect[2] - artboard.artboardRect[0]) / 2;
+        var centerY = artboard.artboardRect[1] + (artboard.artboardRect[3] - artboard.artboardRect[1]) / 2;
+        nextX += centerX;
+        nextY += centerY;
+        prevX += centerX;
+        prevY += centerY;
+    } else {
+        nextX += width / 2;
+        nextY -= height / 2;
+        prevX += width / 2;
+        prevY -= height / 2;
+    }
+    
+    // ハンドル長の計算（点間距離の1/3）
+    var handleLength = Math.min(width, height) / 6;
+    
+    // 接線方向ベクトル
+    var dx = (nextX - prevX) / 2;
+    var dy = (nextY - prevY) / 2;
+    
+    // ベクトルの正規化
+    var length = Math.sqrt(dx * dx + dy * dy);
+    if (length > 0) {
+        dx = dx / length * handleLength;
+        dy = dy / length * handleLength;
+    }
+    
+    // ハンドル位置の設定
+    var outHandle = [anchorpoint[i][0] + dx, anchorpoint[i][1] + dy];
+    var inHandle = [anchorpoint[i][0] - dx, anchorpoint[i][1] - dy];
+    
     var pt = pObj.pathPoints[i];
     pt.anchor = anchorpoint[i];
     pt.leftDirection = inHandle;
