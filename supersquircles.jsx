@@ -48,13 +48,19 @@ var shapeGroup = dlg.add('panel', undefined, '形状設定');
 shapeGroup.orientation = 'column';
 shapeGroup.alignChildren = ['fill', 'top'];
 
-var pointRow = shapeGroup.add('group');
-pointRow.orientation = 'row';
-pointRow.alignChildren = ['left', 'center'];
-pointRow.add('statictext', undefined, 'ポイント数:');
-var pointInput = pointRow.add('edittext', undefined, '12');
-pointInput.characters = 8;
-pointRow.add('statictext', undefined, '（8-64推奨）');
+// ポイント数選択（ラジオボタン）
+var pointLabel = shapeGroup.add('statictext', undefined, 'ポイント数:');
+var pointRadioGroup = shapeGroup.add('group');
+pointRadioGroup.orientation = 'row';
+pointRadioGroup.alignChildren = ['left', 'center'];
+
+var point8Radio = pointRadioGroup.add('radiobutton', undefined, '8');
+var point10Radio = pointRadioGroup.add('radiobutton', undefined, '10');
+var point12Radio = pointRadioGroup.add('radiobutton', undefined, '12');
+var point16Radio = pointRadioGroup.add('radiobutton', undefined, '16');
+
+// デフォルトで12を選択
+point12Radio.value = true;
 
 var exponentRow = shapeGroup.add('group');
 exponentRow.orientation = 'row';
@@ -108,7 +114,21 @@ if (dlg.show() != 1) {
 // パラメータ取得と検証
 var width = validateInput(widthInput.text, 1, 10000, 200, '横幅');
 var height = validateInput(heightInput.text, 1, 10000, 200, '縦幅');
-var pointCount = Math.round(validateInput(pointInput.text, 4, 100, 12, 'ポイント数'));
+
+// ポイント数をラジオボタンから取得
+var pointCount;
+if (point8Radio.value) {
+    pointCount = 8;
+} else if (point10Radio.value) {
+    pointCount = 10;
+} else if (point12Radio.value) {
+    pointCount = 12;
+} else if (point16Radio.value) {
+    pointCount = 16;
+} else {
+    pointCount = 12; // デフォルト値
+}
+
 var n = validateInput(exponentInput.text, 0.1, 20, 2.5, '指数');
 var strokeWidth = validateInput(strokeInput.text, 0, 100, 1, '線幅');
 var isFilled = fillCheck.value;
